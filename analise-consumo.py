@@ -6,8 +6,8 @@ import numpy as np
 from statsmodels.tsa.deterministic import DeterministicProcess
 
 
-consumo = pd.read_excel("C:/Users/U356242/Desktop/Python/CONSUMO TRAFO 30KVA.xlsx", parse_dates=['Entrado em'])
-consumo = consumo.set_index('Entrado em')
+consumo = pd.read_excel("C:/Users/joaov/OneDrive/Área de Trabalho/Python/Análise de Consumo/CONSUMO TRAFO 30KVA.xlsx", parse_dates=['Entrado em'])
+#consumo = consumo.set_index('Entrado em')
 
 # for i in consumo.index:
 #     data = str(consumo['Entrado em'][i])
@@ -15,11 +15,10 @@ consumo = consumo.set_index('Entrado em')
 #     data = datetime_object.strftime("%d/%m/%y")
 #     data = datetime.strptime(data, '%d/%m/%y')
 #     consumo['Entrado em'][i] = data
-
+consumo = consumo[['Entrado em','Qtd.']]
 consumo_group = consumo.groupby(by='Entrado em').sum()
 
 # Set Matplotlib defaults
-plt.style.use("seaborn-whitegrid")
 plt.rc("figure", autolayout=True, figsize=(11, 5))
 plt.rc(
     "axes",
@@ -37,16 +36,16 @@ plot_params = dict(
     legend=False,
 )
 
-# moving_average = consumo_group.rolling(
-#     window=365,       # 365-day window
-#     center=True,      # puts the average at the center of the window
-#     min_periods=183,  # choose about half the window size
-# ).mean()              # compute the mean (could also do median, std, min, max, ...)
+moving_average = consumo_group.rolling(
+    window=365,       # 365-day window
+    center=True,      # puts the average at the center of the window
+    min_periods=183,  # choose about half the window size
+).mean()              # compute the mean (could also do median, std, min, max, ...)
 
-# ax = consumo_group.plot(style=".", color="0.5")
-# moving_average.plot(
-#     ax=ax, linewidth=3, title="Consumo - 365-Day Moving Average", legend=False,
-# );
+ax = consumo_group.plot(style=".", color="0.5")
+moving_average.plot(
+    ax=ax, linewidth=3, title="Consumo - 365-Day Moving Average", legend=False,
+);
 
 dp = DeterministicProcess(
     index=consumo_group.index,  # dates from the training data
@@ -56,5 +55,3 @@ dp = DeterministicProcess(
 )
 # `in_sample` creates features for the dates given in the `index` argument
 X = dp.in_sample()
-
-print(X.head())
